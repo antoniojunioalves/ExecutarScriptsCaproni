@@ -150,7 +150,6 @@ end;
 procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
 var
   Ini: TIniFile;
-  sCaminhoPadrao: string;
 begin
   Ini := TIniFile.Create(ChangeFileExt(Application.ExeName, '.INI'));
   try
@@ -169,8 +168,11 @@ var
 begin
   Ini := TIniFile.Create(ChangeFileExt(Application.ExeName, '.INI'));
   try
-    sCaminhoPadrao := Ini.ReadString(s_INI_TELA, s_INI_ORIGEM_SCRIPT, s_CAMINHO_DEFAULT);
-
+    sCaminhoPadrao := Trim(Ini.ReadString(s_INI_TELA, s_INI_ORIGEM_SCRIPT, s_CAMINHO_DEFAULT));
+     
+    if sCaminhoPadrao = '' then
+      sCaminhoPadrao := s_CAMINHO_DEFAULT;
+	  
     edtOrigem.Text := sCaminhoPadrao;
   finally
     Ini.Free;
