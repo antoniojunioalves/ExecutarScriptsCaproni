@@ -55,7 +55,7 @@ procedure TForm1.CopiarScripts(psOrigem: string);
 var
   i: Integer;
   sScript: string;
-  sListaDbChangeXML: TStringList;
+  oListaDbChangeXML: TStringList;
   sOrigemDB2: string;
   sOrigemORACLE: string;
   sOrigemSQLSERVER: string;
@@ -82,10 +82,10 @@ begin
   sDestinoORACLE := s_CAPRONI_BIN_ORACLE + 'INPUT\SG\';
   sDestinoSQLSERVER := s_CAPRONI_BIN_SQLSERVER + 'INPUT\SG\';
 
-  sListaDbChangeXML := TStringList.Create;
+  oListaDbChangeXML := TStringList.Create;
   try
-    sListaDbChangeXML.Add('<?xml version="1.0" encoding="UTF-8"?>');
-    sListaDbChangeXML.Add('<havillan>');
+    oListaDbChangeXML.Add('<?xml version="1.0" encoding="UTF-8"?>');
+    oListaDbChangeXML.Add('<havillan>');
 
     for i := 0 to mmoListaScripts.Lines.Count -1 do
     begin
@@ -94,20 +94,20 @@ begin
       if sScript.IsEmpty then
         Continue;
 
-      sListaDbChangeXML.Add('<script a_name="' + sScript + '" version="99.99.99" x_has_pos="false" z_description="Execucao automatica"/>');
+      oListaDbChangeXML.Add('<script a_name="' + sScript + '" version="99.99.99" x_has_pos="false" z_description="Execucao automatica"/>');
 
       CopyFile(PWideChar(sOrigemDB2 + sScript), PWideChar(sDestinoDB2 + sScript), True);
       CopyFile(PWideChar(sOrigemORACLE + sScript), PWideChar(sDestinoORACLE + sScript), True);
       CopyFile(PWideChar(sOrigemSQLSERVER + sScript), PWideChar(sDestinoSQLSERVER + sScript), True);
     end;
 
-    sListaDbChangeXML.Add('</havillan>');
+    oListaDbChangeXML.Add('</havillan>');
 
-    sListaDbChangeXML.SaveToFile(sDestinoDB2 + 'dbChange.xml');
-    sListaDbChangeXML.SaveToFile(sDestinoORACLE + 'dbChange.xml');
-    sListaDbChangeXML.SaveToFile(sDestinoSQLSERVER + 'dbChange.xml');
+    oListaDbChangeXML.SaveToFile(sDestinoDB2 + 'dbChange.xml');
+    oListaDbChangeXML.SaveToFile(sDestinoORACLE + 'dbChange.xml');
+    oListaDbChangeXML.SaveToFile(sDestinoSQLSERVER + 'dbChange.xml');
   finally
-    FreeAndNil(sListaDbChangeXML);
+    FreeAndNil(oListaDbChangeXML);
   end;
 end;
 
@@ -118,16 +118,16 @@ var
 
   procedure SalvarArquivoBAT(psComando: string; sbancoDados: string);
   var
-    sLista: TStringList;
+    oLista: TStringList;
   begin
-    sLista := TStringList.Create;
+    oLista := TStringList.Create;
     try
-      sLista.Clear;
-      sLista.Add(psComando);
-      sLista.Add('pause');
-      sLista.SaveToFile(sNomeArquivoComando + '\Comando' + sbancoDados + '.bat');
+      oLista.Clear;
+      oLista.Add(psComando);
+      oLista.Add('pause');
+      oLista.SaveToFile(sNomeArquivoComando + '\Comando' + sbancoDados + '.bat');
     finally
-      FreeAndNil(sLista)
+      FreeAndNil(oLista)
     end;
   end;
 begin
