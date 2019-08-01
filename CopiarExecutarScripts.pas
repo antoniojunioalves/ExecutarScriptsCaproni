@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, ShellApi;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, ShellApi, IniFiles;
 
 type
   TForm1 = class(TForm)
@@ -15,6 +15,8 @@ type
     mmoListaScripts: TMemo;
     procedure btnCopiarClick(Sender: TObject);
     procedure btnExecutarClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
     procedure CopiarScripts(psOrigem: string);
@@ -34,6 +36,9 @@ const
   s_CAPRONI_BIN_DB2 = 'C:\CAPRONI_CMD\BIN_DB2\';
   s_CAPRONI_BIN_ORACLE = 'C:\CAPRONI_CMD\BIN_ORACLE\';
   s_CAPRONI_BIN_SQLSERVER = 'C:\CAPRONI_CMD\BIN_SQLSERVER\';
+
+  s_INI_TELA = 'TELA';
+  s_INI_ORIGEM_SCRIPT = 'ORIGEM_SCRIPT';
 
 { TForm1 }
 procedure TForm1.btnCopiarClick(Sender: TObject);
@@ -109,37 +114,66 @@ end;
 procedure TForm1.ExecutarScripts;
 var
   sComando: string;
-  sLista: TStringList;
   sNomeArquivoComando: string;
+
+  procedure SalvarArquivoBAT(psComando: string; sbancoDados: string);
+  var
+    sLista: TStringList;
+  begin
+    sLista := TStringList.Create;
+    try
+      sLista.Clear;
+      sLista.Add(psComando);
+      sLista.Add('pause');
+      sLista.SaveToFile(sNomeArquivoComando + '\Comando' + sbancoDados + '.bat');
+    finally
+      FreeAndNil(sLista)
+    end;
+  end;
 begin
-  sLista := TStringList.Create;
+  sNomeArquivoComando := ExtractFilePath(Application.ExeName);
+
+  sComando := s_CAPRONI_BIN_DB2 + 'capronica3.exe -is';
+  SalvarArquivoBAT(sComando, 'DB2');
+
+  sComando := s_CAPRONI_BIN_ORACLE + 'capronica3.exe -is';
+  SalvarArquivoBAT(sComando, 'ORACLE');
+
+  sComando := s_CAPRONI_BIN_SQLSERVER + 'capronica3.exe -is';
+  SalvarArquivoBAT(sComando, 'SQLSERVER');
+
+  ShellExecute(handle, 'open', PChar(sNomeArquivoComando + '\ComandoDB2.bat'), '', '', SW_SHOWNORMAL);
+  ShellExecute(handle, 'open', PChar(sNomeArquivoComando + '\ComandoORACLE.bat'), '', '', SW_SHOWNORMAL);
+  ShellExecute(handle, 'open', PChar(sNomeArquivoComando + '\ComandoSQLSERVER.bat'), '', '', SW_SHOWNORMAL);
+end;
+
+procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
+var
+  Ini: TIniFile;
+  sCaminhoPadrao: string;
+begin
+  Ini := TIniFile.Create(ChangeFileExt(Application.ExeName, '.INI'));
   try
-//    sNomeArquivoComando := ExtractFileDir(GetCurrentDir);
-    sNomeArquivoComando := ExtractFilePath(Application.ExeName);
-
-    sLista.Clear;
-    sComando := s_CAPRONI_BIN_DB2 + 'capronica3.exe -is';
-    sLista.Add(sComando);
-    sLista.Add('pause');
-    sLista.SaveToFile(sNomeArquivoComando + '\ComandoDB2.bat');
-
-    sLista.Clear;
-    sComando := s_CAPRONI_BIN_ORACLE + 'capronica3.exe -is';
-    sLista.Add(sComando);
-    sLista.Add('pause');
-    sLista.SaveToFile(sNomeArquivoComando + '\ComandoORACLE.bat');
-
-    sLista.Clear;
-    sComando := s_CAPRONI_BIN_SQLSERVER + 'capronica3.exe -is';
-    sLista.Add(sComando);
-    sLista.Add('pause');
-    sLista.SaveToFile(sNomeArquivoComando + '\ComandoSQLSERVER.bat');
-
-    ShellExecute(handle, 'open', PChar(sNomeArquivoComando + '\ComandoDB2.bat'), '', '', SW_SHOWNORMAL);
-    ShellExecute(handle, 'open', PChar(sNomeArquivoComando + '\ComandoORACLE.bat'), '', '', SW_SHOWNORMAL);
-    ShellExecute(handle, 'open', PChar(sNomeArquivoComando + '\ComandoSQLSERVER.bat'), '', '', SW_SHOWNORMAL);
+    Ini.WriteString(s_INI_TELA, s_INI_ORIGEM_SCRIPT, edtOrigem.Text);
   finally
-    FreeAndNil(sLista);
+    Ini.Free;
+  end;
+end;
+
+procedure TForm1.FormCreate(Sender: TObject);
+const
+  s_CAMINHO_DEFAULT = 'C:\RTC\PIPELINE_SG5_RUSSIA_CONTINUO\PIPELINE_SG5_RUSSIA_CONTINUO\dbscript\SG';
+var
+  Ini: TIniFile;
+  sCaminhoPadrao: string;
+begin
+  Ini := TIniFile.Create(ChangeFileExt(Application.ExeName, '.INI'));
+  try
+    sCaminhoPadrao := Ini.ReadString(s_INI_TELA, s_INI_ORIGEM_SCRIPT, s_CAMINHO_DEFAULT);
+
+    edtOrigem.Text := sCaminhoPadrao;
+  finally
+    Ini.Free;
   end;
 end;
 

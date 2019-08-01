@@ -2,7 +2,7 @@ program CopiarExecutarCaproni;
 
 uses
   Vcl.Forms,
-  Unit1 in 'Unit1.pas' {Form1};
+  CopiarExecutarScripts in 'CopiarExecutarScripts.pas' {Form1};
 
 {$R *.res}
 
