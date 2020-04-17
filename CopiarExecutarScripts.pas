@@ -3,8 +3,9 @@ unit CopiarExecutarScripts;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, ShellApi, IniFiles;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, ShellApi,
+  IniFiles;
 
 type
   TForm1 = class(TForm)
@@ -25,7 +26,6 @@ type
     { Public declarations }
   end;
 
-
 var
   Form1: TForm1;
 
@@ -36,7 +36,7 @@ const
   s_CAPRONI_BIN_DB2 = 'C:\CAPRONI_CMD\BIN_DB2\';
   s_CAPRONI_BIN_ORACLE = 'C:\CAPRONI_CMD\BIN_ORACLE\';
   s_CAPRONI_BIN_SQLSERVER = 'C:\CAPRONI_CMD\BIN_SQLSERVER\';
-
+  s_CAPRONI_BIN_POSTGRESQL = 'C:\CAPRONI_CMD\BIN_POSTGRESQL\';
   s_INI_TELA = 'TELA';
   s_INI_ORIGEM_SCRIPT = 'ORIGEM_SCRIPT';
 
@@ -59,9 +59,11 @@ var
   sOrigemDB2: string;
   sOrigemORACLE: string;
   sOrigemSQLSERVER: string;
+  sOrigemPOSTGRESQL: string;
   sDestinoDB2: string;
   sDestinoORACLE: string;
   sDestinoSQLSERVER: string;
+  sDestinoPOSTGRESQL: string;
 begin
   if mmoListaScripts.Lines[0] = 'Informar o nome do script DH4' then
   begin
@@ -77,17 +79,19 @@ begin
   sOrigemDB2 := psOrigem + 'DB2\';
   sOrigemORACLE := psOrigem + 'ORACLE\';
   sOrigemSQLSERVER := psOrigem + 'SQLSERVER\';
+  sOrigemPOSTGRESQL := psOrigem + 'POSTGRESQL\';
 
   sDestinoDB2 := s_CAPRONI_BIN_DB2 + 'INPUT\SG\';
   sDestinoORACLE := s_CAPRONI_BIN_ORACLE + 'INPUT\SG\';
   sDestinoSQLSERVER := s_CAPRONI_BIN_SQLSERVER + 'INPUT\SG\';
+  sDestinoPOSTGRESQL := s_CAPRONI_BIN_POSTGRESQL + 'INPUT\SG\';
 
   oListaDbChangeXML := TStringList.Create;
   try
     oListaDbChangeXML.Add('<?xml version="1.0" encoding="UTF-8"?>');
     oListaDbChangeXML.Add('<havillan>');
 
-    for i := 0 to mmoListaScripts.Lines.Count -1 do
+    for i := 0 to mmoListaScripts.Lines.Count - 1 do
     begin
       sScript := Trim(mmoListaScripts.Lines[i]);
 
@@ -99,6 +103,7 @@ begin
       CopyFile(PWideChar(sOrigemDB2 + sScript), PWideChar(sDestinoDB2 + sScript), True);
       CopyFile(PWideChar(sOrigemORACLE + sScript), PWideChar(sDestinoORACLE + sScript), True);
       CopyFile(PWideChar(sOrigemSQLSERVER + sScript), PWideChar(sDestinoSQLSERVER + sScript), True);
+      CopyFile(PWideChar(sOrigemPOSTGRESQL + sScript), PWideChar(sDestinoPOSTGRESQL + sScript), True);
     end;
 
     oListaDbChangeXML.Add('</havillan>');
@@ -106,6 +111,7 @@ begin
     oListaDbChangeXML.SaveToFile(sDestinoDB2 + 'dbChange.xml');
     oListaDbChangeXML.SaveToFile(sDestinoORACLE + 'dbChange.xml');
     oListaDbChangeXML.SaveToFile(sDestinoSQLSERVER + 'dbChange.xml');
+    oListaDbChangeXML.SaveToFile(sDestinoPOSTGRESQL + 'dbChange.xml');
   finally
     FreeAndNil(oListaDbChangeXML);
   end;
@@ -142,9 +148,13 @@ begin
   sComando := s_CAPRONI_BIN_SQLSERVER + 'capronica3.exe -is';
   SalvarArquivoBAT(sComando, 'SQLSERVER');
 
+  sComando := s_CAPRONI_BIN_POSTGRESQL + 'capronica3.exe -is';
+  SalvarArquivoBAT(sComando, 'POSTGRESQL');
+
   ShellExecute(handle, 'open', PChar(sNomeArquivoComando + '\ComandoDB2.bat'), '', '', SW_SHOWNORMAL);
   ShellExecute(handle, 'open', PChar(sNomeArquivoComando + '\ComandoORACLE.bat'), '', '', SW_SHOWNORMAL);
   ShellExecute(handle, 'open', PChar(sNomeArquivoComando + '\ComandoSQLSERVER.bat'), '', '', SW_SHOWNORMAL);
+  ShellExecute(handle, 'open', PChar(sNomeArquivoComando + '\ComandoPOSTGRESQL.bat'), '', '', SW_SHOWNORMAL);
 end;
 
 procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -169,10 +179,10 @@ begin
   Ini := TIniFile.Create(ChangeFileExt(Application.ExeName, '.INI'));
   try
     sCaminhoPadrao := Trim(Ini.ReadString(s_INI_TELA, s_INI_ORIGEM_SCRIPT, s_CAMINHO_DEFAULT));
-     
+
     if sCaminhoPadrao = '' then
       sCaminhoPadrao := s_CAMINHO_DEFAULT;
-	  
+
     edtOrigem.Text := sCaminhoPadrao;
   finally
     Ini.Free;
@@ -180,3 +190,4 @@ begin
 end;
 
 end.
+
