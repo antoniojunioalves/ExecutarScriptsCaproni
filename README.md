@@ -11,6 +11,7 @@ Tem que ter uma BIN para cada banco
 C:\CAPRONI_CMD\BIN_DB2
 C:\CAPRONI_CMD\BIN_ORACLE
 C:\CAPRONI_CMD\BIN_SQLSERVER
+C:\CAPRONI_CMD\BIN_POSTGRESQL
 ```
 
 E dentro de cada bin é necessário ter a estrutura normal do caproni, e dentro dos config.ini ter a configuração apontando para o banco de dados referente ao nome da bin
@@ -18,11 +19,11 @@ E dentro de cada bin é necessário ter a estrutura normal do caproni, e dentro 
 ### Funcionalidades
 
  * Copiar os scripts do SG informados no Memo do caminho de origem de cada banco, para dentro de cada BIN do caproni de cada banco (Ainda vou estudar os scripts POS se terá que ter algum tratamento especial).
- * Executar o caproni dentro das 3 pastas de cada banco. 
+ * Executar o caproni dentro das 4 pastas de cada banco. 
  * Quando fecha a tela ele salva o caminho informado no campo "Origem dos scripts"
 
 ### Como utilizar
  * Informe o caminho da stream dos scripts do SG Ex.: "C:\RTC\DESKTOP-SG5-DEV\sg5Dev\dbscript\SG".
- * Dentro do memo coloque somente o nome de um script por linha Ex.: "SG111111.DH4".
+ * Dentro do memo coloque somente o nome de um script por linha Ex.: "SG111111.DH4". 
  * Clique em "Copiar Scripts" aí os scripts serão copiados para as suas respectivas pastas para cada banco.
- * Clique em "Executar Scripts" será executados no caproni os scripts que foram copiados. 
+ * Clique em "Executar Scripts" será executados no caproni os scripts que foram copiados, abrindo uma tela do DOS para cada banco. 
