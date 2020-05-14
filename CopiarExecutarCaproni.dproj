@@ -102,7 +102,7 @@
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
         <DCCReference Include="CopiarExecutarScripts.pas">
-            <Form>Form1</Form>
+            <Form>FormExecutarScripts</Form>
         </DCCReference>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>

@@ -1,8 +1,8 @@
-object Form1: TForm1
+object FormExecutarScripts: TFormExecutarScripts
   Left = 0
   Top = 0
   Caption = 'Executar Scripts Caproni'
-  ClientHeight = 117
+  ClientHeight = 220
   ClientWidth = 833
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -54,7 +54,7 @@ object Form1: TForm1
     Left = 562
     Top = 3
     Width = 267
-    Height = 110
+    Height = 210
     Lines.Strings = (
       'Informar o nome do script DH4'
       'um por linha Ex.:'
@@ -64,5 +64,17 @@ object Form1: TForm1
       'N'#195'O TEM TRATAMENTO PARA SCRIPT COM POS'
       '')
     TabOrder = 3
+  end
+  object rgPGouSG: TRadioGroup
+    Left = 14
+    Top = 88
+    Width = 185
+    Height = 61
+    Caption = 'Sistema a rodar o script: '
+    ItemIndex = 1
+    Items.Strings = (
+      'PG'
+      'SG')
+    TabOrder = 4
   end
 end

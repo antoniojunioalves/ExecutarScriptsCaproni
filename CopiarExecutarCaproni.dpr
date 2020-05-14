@@ -2,13 +2,13 @@ program CopiarExecutarCaproni;
 
 uses
   Vcl.Forms,
-  CopiarExecutarScripts in 'CopiarExecutarScripts.pas' {Form1};
+  CopiarExecutarScripts in 'CopiarExecutarScripts.pas' {FormExecutarScripts};
 
 {$R *.res}
 
 begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
-  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TFormExecutarScripts, FormExecutarScripts);
   Application.Run;
 end.

@@ -5,15 +5,16 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, ShellApi,
-  IniFiles;
+  IniFiles, Vcl.ExtCtrls;
 
 type
-  TForm1 = class(TForm)
+  TFormExecutarScripts = class(TForm)
     edtOrigem: TEdit;
     lblOrigem: TLabel;
     btnCopiar: TButton;
     btnExecutar: TButton;
     mmoListaScripts: TMemo;
+    rgPGouSG: TRadioGroup;
     procedure btnCopiarClick(Sender: TObject);
     procedure btnExecutarClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -22,36 +23,45 @@ type
     { Private declarations }
     procedure CopiarScripts(psOrigem: string);
     procedure ExecutarScripts;
+    function RetornarSiglaSistema: string;
+    procedure ConfigurarArquivosINI;
+    function CopiarConfig(psNomeBanco: string; psCaminhoBIN: string): string;
   public
     { Public declarations }
   end;
 
 var
-  Form1: TForm1;
+  FormExecutarScripts: TFormExecutarScripts;
 
 implementation
 
 {$R *.dfm}
 const
+  s_DB2 = 'DB2';
+  s_ORACLE = 'ORACLE';
+  s_SQLSERVER = 'SQLSERVER';
+  s_POSTGRESQL = 'POSTGRESQL';
   s_CAPRONI_BIN_DB2 = 'C:\CAPRONI_CMD\BIN_DB2\';
   s_CAPRONI_BIN_ORACLE = 'C:\CAPRONI_CMD\BIN_ORACLE\';
   s_CAPRONI_BIN_SQLSERVER = 'C:\CAPRONI_CMD\BIN_SQLSERVER\';
   s_CAPRONI_BIN_POSTGRESQL = 'C:\CAPRONI_CMD\BIN_POSTGRESQL\';
   s_INI_TELA = 'TELA';
   s_INI_ORIGEM_SCRIPT = 'ORIGEM_SCRIPT';
+  s_SIGLA_SG = 'SG';
+  s_SIGLA_PG = 'PG5';
 
 { TForm1 }
-procedure TForm1.btnCopiarClick(Sender: TObject);
+procedure TFormExecutarScripts.btnCopiarClick(Sender: TObject);
 begin
   CopiarScripts(edtOrigem.Text);
 end;
 
-procedure TForm1.btnExecutarClick(Sender: TObject);
+procedure TFormExecutarScripts.btnExecutarClick(Sender: TObject);
 begin
   ExecutarScripts;
 end;
 
-procedure TForm1.CopiarScripts(psOrigem: string);
+procedure TFormExecutarScripts.CopiarScripts(psOrigem: string);
 var
   i: Integer;
   sScript: string;
@@ -64,6 +74,7 @@ var
   sDestinoORACLE: string;
   sDestinoSQLSERVER: string;
   sDestinoPOSTGRESQL: string;
+  sSiglaSistema: string;
 begin
   if mmoListaScripts.Lines[0] = 'Informar o nome do script DH4' then
   begin
@@ -71,20 +82,23 @@ begin
     Exit;
   end;
 
+  ConfigurarArquivosINI;
+
   psOrigem := Trim(psOrigem);
 
   if Copy(psOrigem, Length(psOrigem) - 2, Length(psOrigem)) <> PathDelim then
     psOrigem := psOrigem + PathDelim;
 
-  sOrigemDB2 := psOrigem + 'DB2\';
-  sOrigemORACLE := psOrigem + 'ORACLE\';
-  sOrigemSQLSERVER := psOrigem + 'SQLSERVER\';
-  sOrigemPOSTGRESQL := psOrigem + 'POSTGRESQL\';
+  sOrigemDB2 := psOrigem + s_DB2 + '\';
+  sOrigemORACLE := psOrigem + s_ORACLE + '\';
+  sOrigemSQLSERVER := psOrigem + s_SQLSERVER + '\';
+  sOrigemPOSTGRESQL := psOrigem + s_POSTGRESQL + '\';
 
-  sDestinoDB2 := s_CAPRONI_BIN_DB2 + 'INPUT\SG\';
-  sDestinoORACLE := s_CAPRONI_BIN_ORACLE + 'INPUT\SG\';
-  sDestinoSQLSERVER := s_CAPRONI_BIN_SQLSERVER + 'INPUT\SG\';
-  sDestinoPOSTGRESQL := s_CAPRONI_BIN_POSTGRESQL + 'INPUT\SG\';
+  sSiglaSistema := RetornarSiglaSistema;
+  sDestinoDB2 := s_CAPRONI_BIN_DB2 + 'INPUT\' + sSiglaSistema + '\';
+  sDestinoORACLE := s_CAPRONI_BIN_ORACLE + 'INPUT\' + sSiglaSistema + '\';
+  sDestinoSQLSERVER := s_CAPRONI_BIN_SQLSERVER + 'INPUT\' + sSiglaSistema + '\';
+  sDestinoPOSTGRESQL := s_CAPRONI_BIN_POSTGRESQL + 'INPUT\' + sSiglaSistema + '\';
 
   oListaDbChangeXML := TStringList.Create;
   try
@@ -117,7 +131,7 @@ begin
   end;
 end;
 
-procedure TForm1.ExecutarScripts;
+procedure TFormExecutarScripts.ExecutarScripts;
 var
   sComando: string;
   sNomeArquivoComando: string;
@@ -140,24 +154,24 @@ begin
   sNomeArquivoComando := ExtractFilePath(Application.ExeName);
 
   sComando := s_CAPRONI_BIN_DB2 + 'capronica3.exe -is';
-  SalvarArquivoBAT(sComando, 'DB2');
+  SalvarArquivoBAT(sComando, s_DB2);
 
   sComando := s_CAPRONI_BIN_ORACLE + 'capronica3.exe -is';
-  SalvarArquivoBAT(sComando, 'ORACLE');
+  SalvarArquivoBAT(sComando, s_ORACLE);
 
   sComando := s_CAPRONI_BIN_SQLSERVER + 'capronica3.exe -is';
-  SalvarArquivoBAT(sComando, 'SQLSERVER');
+  SalvarArquivoBAT(sComando, s_SQLSERVER);
 
   sComando := s_CAPRONI_BIN_POSTGRESQL + 'capronica3.exe -is';
-  SalvarArquivoBAT(sComando, 'POSTGRESQL');
+  SalvarArquivoBAT(sComando, s_POSTGRESQL);
 
-  ShellExecute(handle, 'open', PChar(sNomeArquivoComando + '\ComandoDB2.bat'), '', '', SW_SHOWNORMAL);
-  ShellExecute(handle, 'open', PChar(sNomeArquivoComando + '\ComandoORACLE.bat'), '', '', SW_SHOWNORMAL);
-  ShellExecute(handle, 'open', PChar(sNomeArquivoComando + '\ComandoSQLSERVER.bat'), '', '', SW_SHOWNORMAL);
-  ShellExecute(handle, 'open', PChar(sNomeArquivoComando + '\ComandoPOSTGRESQL.bat'), '', '', SW_SHOWNORMAL);
+  ShellExecute(handle, 'open', PChar(sNomeArquivoComando + '\Comando' + s_DB2 + '.bat'), '', '', SW_SHOWNORMAL);
+  ShellExecute(handle, 'open', PChar(sNomeArquivoComando + '\Comando' + s_ORACLE + '.bat'), '', '', SW_SHOWNORMAL);
+  ShellExecute(handle, 'open', PChar(sNomeArquivoComando + '\Comando' + s_SQLSERVER + '.bat'), '', '', SW_SHOWNORMAL);
+  ShellExecute(handle, 'open', PChar(sNomeArquivoComando + '\Comando' + s_POSTGRESQL + '.bat'), '', '', SW_SHOWNORMAL);
 end;
 
-procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
+procedure TFormExecutarScripts.FormClose(Sender: TObject; var Action: TCloseAction);
 var
   Ini: TIniFile;
 begin
@@ -169,7 +183,7 @@ begin
   end;
 end;
 
-procedure TForm1.FormCreate(Sender: TObject);
+procedure TFormExecutarScripts.FormCreate(Sender: TObject);
 const
   s_CAMINHO_DEFAULT = 'C:\RTC\PIPELINE_SG5_RUSSIA_CONTINUO\PIPELINE_SG5_RUSSIA_CONTINUO\dbscript\SG';
 var
@@ -187,6 +201,40 @@ begin
   finally
     Ini.Free;
   end;
+end;
+
+function TFormExecutarScripts.RetornarSiglaSistema: string;
+begin
+  case rgPGouSG.ItemIndex of
+    0: Result := s_SIGLA_PG;
+    1: Result := s_SIGLA_SG;
+  end;
+end;
+
+procedure TFormExecutarScripts.ConfigurarArquivosINI;
+var
+  sCaminhoExecutavel: string;
+begin
+  CopiarConfig(s_DB2, s_CAPRONI_BIN_DB2);
+  CopiarConfig(s_ORACLE, s_CAPRONI_BIN_ORACLE);
+  CopiarConfig(s_SQLSERVER, s_CAPRONI_BIN_SQLSERVER);
+  CopiarConfig(s_POSTGRESQL, s_CAPRONI_BIN_POSTGRESQL);
+end;
+
+function TFormExecutarScripts.CopiarConfig(psNomeBanco: string; psCaminhoBIN: string): string;
+var
+  sSiglaSistema: string;
+  sCaminhoExecutavel: string;
+begin
+  sCaminhoExecutavel := ExtractFilePath(Application.ExeName);
+  sSiglaSistema := RetornarSiglaSistema;
+
+  DeleteFile(psCaminhoBIN + 'config.ini');
+
+  if sSiglaSistema = s_SIGLA_PG then
+    CopyFile(PWideChar(sCaminhoExecutavel + '\Templates\config_' + psNomeBanco + '_pg.ini'), PWideChar(psCaminhoBIN + 'config.ini'), True)
+  else if sSiglaSistema = s_SIGLA_SG then
+    CopyFile(PWideChar(sCaminhoExecutavel + '\Templates\config_' + psNomeBanco + '_sg.ini'), PWideChar(psCaminhoBIN + 'config.ini'), True);
 end;
 
 end.
